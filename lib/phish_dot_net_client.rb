@@ -2,6 +2,7 @@
 
 require 'restclient'
 require 'json'
+require 'nokogiri'
 
 require 'phish_dot_net_client/version'
 
@@ -9,6 +10,7 @@ require 'phish_dot_net_client/version'
 module PhishDotNetClient
   extend self
 
+  # The possible API methods. Generated from +rake parse_method_docs+.
   API_METHODS =
     {
       "pnet.api.authkey.get"        => { :scope => "protected" },
@@ -55,24 +57,28 @@ module PhishDotNetClient
   @@options = { :api    => "2.0",
                 :format => "json" }
 
-  # @todo write doc
-  def authorize(private_api_key)
+  def apikey=(private_api_key)
     @@options.merge!(:apikey => private_api_key)
   end
 
+  def authorize(username=nil, passwd=nil)
+    resp = call_api_method("pnet.api.authorize", :username => username, :passwd => passwd)
+
+    if resp['success'] == 1 && resp.has_key?('authkey')
+      @@options.merge!(:username => username, :authkey => resp['authkey'])
+    end
+  end
+
   def clear_auth
-    @@options.delete(:apikey)
+    [:apikey, :username, :authkey].each { |key| @@options.delete(key) }
   end
 
   # @param opts [Hash] the options for the api call
   # @option opts [String] :method the method to call
   # @option opts [Hash] :args the method arguments
-  # @option
-  #
-  # @todo write doc
   def call_api_method(api_method, args={})
-    method_data = API_METHODS[api_method]
-    ensure_api_key if method_data[:scope] == "protected"
+    # method_data = API_METHODS[api_method]
+    # ensure_api_key if method_data[:scope] == "protected"
 
     args.merge!(:method => api_method)
     response = RestClient.get BASE_URL, { :params => @@options.merge(args) }
@@ -99,6 +105,10 @@ module PhishDotNetClient
   def get_api_method(rb_method_name)
     api_method_name = rb_method_name.to_s.gsub("_", ".")
 
+    unless api_method_name.match(/\Apnet\./)
+      api_method_name = 'pnet.' + api_method_name
+    end
+
     if API_METHODS.has_key?(api_method_name)
       return api_method_name
     else
@@ -106,7 +116,48 @@ module PhishDotNetClient
     end
   end
 
-  def ensure_api_key
-    raise "api key is required" if @@options[:apikey].nil?
+  # def ensure_api_key
+  #   raise "api key is required" if @@options[:apikey].nil?
+  # end
+
+  def parse_setlistdata(setlistdata)
+    sets = []
+    slug_instances = {}
+    require 'ap'
+
+    doc = Nokogiri::HTML(setlistdata)
+    setnodes = doc.css(".pnetset")
+
+    setnodes.each do |n|
+      settext = n.content
+      # puts n
+
+      set = {}
+      setname = n.css(".pnetsetlabel").first.content
+      setname.sub!(/:\z/, '')
+      puts setname
+
+      set[:name] = setname
+
+      set[:songs] = []
+
+      songs = n.css("a")
+      songs.each do |song|
+        title = song.content
+        # puts title
+        url = song.attr('href')
+        # puts url
+        slug = URI.parse(url).path
+        slug.sub!(/\A\/song\//, '')
+        # puts slug
+        slug_instances[slug] ||= 0
+        slug_instances[slug] += 1
+
+        set[:songs] << {:title => title, :url => url, :slug => slug, :instance => slug_instances[slug]}
+      end
+      ap set
+    end
+
+    return sets
   end
 end
