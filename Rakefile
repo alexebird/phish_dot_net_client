@@ -3,22 +3,19 @@ require 'rspec/core/rake_task'
 
 desc "Parse the documentation from Phish.net to get the current method calls"
 task :parse_method_docs do
-  require 'nokogiri'
+  # require 'nokogiri'
   require 'open-uri'
-  require 'pp'
 
   doc_url = "http://api.phish.net/docu/navigation.php"
   methods = {}
-
   longest_method_name = 0
   doc = Nokogiri::HTML(open(doc_url))
+
   doc.css("#static-list li.sub span").each_slice(2) do |method,scope|
     method = method.content
-
     if method.size > longest_method_name
       longest_method_name = method.size
     end
-
     methods[method] = { :scope => scope.content }
   end
 

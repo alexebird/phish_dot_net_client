@@ -1,3 +1,10 @@
-Gemfile.lock
+.DS_Store
+coverage/*
+data/*
+tmp/*
+.tags
+.tags_sorted_by_file
+.yardoc/*
+doc/*
 .ruby-gemset
 .ruby-version
