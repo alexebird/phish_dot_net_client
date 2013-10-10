@@ -34,7 +34,8 @@ Rubygems:
     PhishDotNetClient.shows_query :month => '7', :country => 'USA', :state => 'CA'
 
     # Arguments are not checked for validity before being passed
-    PhishDotNetClient.shows_setlists_get :fluff => 'head'  # returns {"success" => 0,"reason" => "General API Error"}
+    PhishDotNetClient.shows_setlists_get :fluff => 'head'
+    # => returns {"success" => 0,"reason" => "General API Error"}
 
     # All methods return JSON parsed into Ruby Hashes/Arrays
     tweez = PhishDotNetClient.shows_setlists_get :showdate => '2013-07-31'
