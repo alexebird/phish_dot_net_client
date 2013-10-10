@@ -6,7 +6,6 @@ gem 'nokogiri', '~> 1.6.0'
 
 group :development do
   gem 'rake'
-  gem 'fuubar'
   gem 'rspec'
-  gem 'awesome_print'
+  gem 'yard'
 end

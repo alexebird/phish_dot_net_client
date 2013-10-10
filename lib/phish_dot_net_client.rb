@@ -2,11 +2,10 @@
 
 require 'restclient'
 require 'json'
-# require 'nokogiri'
+require 'nokogiri'
 
 require 'phish_dot_net_client/set'
 require 'phish_dot_net_client/setlist'
-require 'phish_dot_net_client/show'
 require 'phish_dot_net_client/song'
 require 'phish_dot_net_client/song_transition'
 require 'phish_dot_net_client/version'
@@ -82,6 +81,7 @@ module PhishDotNetClient
   # @param params [Hash] the url parameters for the api call
   #
   # @return [Hash, Array] the parsed JSON of API response
+  # @api private
   def call_api_method(api_method, params={})
     # method_data = API_METHODS[api_method]
     # ensure_api_key if method_data[:scope] == "protected"
@@ -95,13 +95,18 @@ module PhishDotNetClient
 
     parsed = JSON.parse(response)
 
-    # if parsed.is_a?(Array)
-
-    # end
+    if parsed.is_a?(Array)
+      parsed.each do |obj|
+        obj["setlistdata"] = Setlist.new(obj["setlistdata"]) if obj.has_key?("setlistdata")
+      end
+    elsif parsed.is_a?(Hash)
+      parsed["setlistdata"] = Setlist.new(parsed["setlistdata"]) if parsed.has_key?("setlistdata")
+    end
 
     return parsed
   end
 
+  # @api private
   def method_missing(name, *args)
     api_method = get_api_method(name)
 
@@ -114,6 +119,7 @@ module PhishDotNetClient
 
   # private
 
+  # @api private
   def get_api_method(rb_method_name)
     api_method_name = rb_method_name.to_s.gsub("_", ".")
 

@@ -77,8 +77,6 @@ describe PhishDotNetClient::Setlist do
 
     it "accounts for songs with the same title" do
       setlist.augment_songs(transitions_tokens, [song1, song2, song1again], footnotes)
-      [song1, song2, song1again].each {|s| puts s.to_s }
-      # expect(song2.post_transition).to be_instance_of(PhishDotNetClient::SongTransition)
       expect(song2.post_transition).to eq(song1again.pre_transition)
       expect(song2.post_transition.type).to eq(:deep_segue)
     end

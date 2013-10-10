@@ -1,7 +1,6 @@
 # encoding: utf-8
 
-require 'nokogiri'
-
+# @api private
 module PhishDotNetClient
   class Setlist
 
@@ -16,6 +15,7 @@ module PhishDotNetClient
       return @sets.map(&:songs).reduce([]){|memo,songs| memo += songs }
     end
 
+    # @api private
     def self.parse_setlistdata(setlistdata)
       doc = Nokogiri::HTML(setlistdata)
 
@@ -70,11 +70,11 @@ module PhishDotNetClient
       end
 
       augment_songs(transitions_tokens, all_songs, footnotes)
-      all_songs.each {|s| puts s.to_s }
 
       return sets, footnotes
     end
 
+    # @api private
     def self.augment_songs(tokens, songs, footnotes)
       songs = Array.new(songs)  # make a copy
 
@@ -112,6 +112,7 @@ module PhishDotNetClient
       end
     end
 
+    # @api private
     def self.tokenize_transitions_text(transitions_text, existing_tokens=[])
       tokens = []
 
@@ -129,7 +130,7 @@ module PhishDotNetClient
         return { type: :set_name, name: match.to_s.strip.sub(':', '') }
       end)
 
-      tokens.push(/\A[a-z0-9\s]+[a-z0-9]/i => lambda do |match|
+      tokens.push(/\A[äa-z0-9\-?\.!:\/'\s\(\)]+[a-z0-9\)?!']/i => lambda do |match|
         title = match.to_s.strip
         song_title_counts[title] ||= 0
         song_title_counts[title] += 1
@@ -172,7 +173,7 @@ module PhishDotNetClient
           end
         end
 
-        raise "could not parse: '#{settext}'" unless matched
+        raise "could not parse: '#{transitions_text}'" unless matched
       end
 
       return parsed_set

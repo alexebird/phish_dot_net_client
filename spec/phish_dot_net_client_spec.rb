@@ -23,12 +23,12 @@ describe PhishDotNetClient do
     end
   end
 
-  # describe "#authorize" do
-  #   it "sets the username" do
-  #     pnet.authorize('uzer', 'asdfasdf')
-  #     expect(access_default_params(:username)).to eq('uzer')
-  #   end
-  # end
+  describe "#authorize" do
+    it "sets the username" do
+      # pnet.authorize('uzer', 'asdfasdf')
+      # expect(access_default_params(:username)).to eq('uzer')
+    end
+  end
 
   describe "#clear_auth" do
     before(:each) do
@@ -48,7 +48,7 @@ describe PhishDotNetClient do
     end
   end
 
-  # describe "#call_api_method" do
+  describe "#call_api_method" do
     # context "when the api_method is protected" do
     #   it "raises an error if no apikey is specified" do
     #     pnet.clear_auth
@@ -56,10 +56,11 @@ describe PhishDotNetClient do
     #   end
     # end
 
-  #   it "calls the api" do
-  #     expect(pnet.call_api_method("pnet.shows.setlists.recent")).to_not be_nil
-  #   end
-  # end
+    it "calls the api" do
+      rv = pnet.call_api_method("pnet.shows.setlists.latest")
+      expect(rv[0]["setlistdata"]).to be_instance_of(PhishDotNetClient::Setlist)
+    end
+  end
 
   describe "#method_missing" do
     context "when the api method is a valid" do

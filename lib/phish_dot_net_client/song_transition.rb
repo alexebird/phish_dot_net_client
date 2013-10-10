@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+# @api private
 module PhishDotNetClient
   class SongTransition
 

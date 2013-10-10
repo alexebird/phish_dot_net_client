@@ -1,9 +1,8 @@
 # encoding: utf-8
 
+# @api private
 module PhishDotNetClient
   class Song
-    # include Comparable
-
     attr_reader :title
     attr_reader :url
     attr_reader :slug
@@ -44,18 +43,5 @@ module PhishDotNetClient
       s.puts
       return s.string
     end
-
-
-    # def <=>(other_obj)
-    #   return nil unless other_obj.is_a?(Song)
-
-    #   return @position_in_show <=> other_obj.position_in_show
-    # end
-
-    # def ==(other_obj)
-    #   return nil unless other_obj.is_a?(Song)
-
-    #   return @title == other_obj.title && @position_in_show == other_obj.position_in_show
-    # end
   end
 end
