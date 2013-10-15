@@ -1,5 +1,7 @@
 # Phish.net API Client
 
+<a href="http://badge.fury.io/rb/phish_dot_net_client"><img src="https://badge.fury.io/rb/phish_dot_net_client@2x.png" alt="Gem Version" height="18"></a>
+
 A Phish.net API client, with support for parsing the 'setlistdata' field. Inspired by the other Ruby Phish.net API [client](http://api.phish.net/wrappers/ruby.php) written by [Stephen Blackstone](http://phish.net/user/steveb3210).
 
 [rdoc](http://rubydoc.info/github/alexebird/phish_dot_net_client/master/frames/file/README.md)
