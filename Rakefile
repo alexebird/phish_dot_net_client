@@ -53,7 +53,6 @@ task :"release:instructions" do
   puts "2. update History.md"
   puts "       git log #{last_release}..HEAD --no-merges --format=%B"
   puts "3. git commit, git tag v#{version}, git push origin v#{version}"
-  puts "4. gem build #{gem_name}.gemspec"
-  puts "5. mv #{gem_name}-#{version}.gem ~/gems/"
-  puts "6. gem push ~/gems/#{gem_name}-#{version}.gem"
+  puts "4. gem build #{gem_name}.gemspec ; mv #{gem_name}-#{version}.gem ~/gems/"
+  puts "5. gem push ~/gems/#{gem_name}-#{version}.gem"
 end
