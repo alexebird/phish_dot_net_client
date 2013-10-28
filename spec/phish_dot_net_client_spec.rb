@@ -5,7 +5,7 @@ describe PhishDotNetClient do
   let(:fake_api_key) { "fake-apikey" }
 
   def access_default_params(key)
-    return pnet.class_variable_get(:@@default_params)[key]
+    return PhishDotNetClient::DEFAULT_PARAMS[key]
   end
 
   it "pre-sets the api version to '2.0'" do

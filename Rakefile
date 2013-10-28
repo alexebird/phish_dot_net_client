@@ -1,6 +1,5 @@
 require 'rspec/core/rake_task'
 
-
 desc "Parse the documentation from Phish.net to get the current method calls"
 task :parse_method_docs do
   # require 'nokogiri'
@@ -38,18 +37,23 @@ RSpec::Core::RakeTask.new(:spec) do |t|
   # t.verbose = false
 end
 
-desc "Run specs in spec/units"
-RSpec::Core::RakeTask.new('spec:units') do |t|
-  t.pattern = "./spec/units/**/*_spec.rb"
-end
-
-desc "Run specs in spec/integration"
-RSpec::Core::RakeTask.new('spec:integration') do |t|
-  t.pattern = "./spec/integration/**/*_spec.rb"
-end
-
 desc "Generate documentation"
 task :doc do
   require 'yard'
   sh "yard"
+end
+
+desc "Instructions for releasing a new version"
+task :"release:instructions" do
+  version = PhishDotNetClient::VERSION
+  gem_name = File.basename Dir.glob(File.join(File.expand_path('../', __FILE__), '*.gemspec')).first.sub('.gemspec', '')
+  last_release = `git tag | grep --color=never -e "v\\d\\+\\." | sort | tail -n1`.strip
+
+  puts "1. update version.rb"
+  puts "2. update History.md"
+  puts "       git log #{last_release}..HEAD --no-merges --format=%B"
+  puts "3. git commit, git tag v#{version}, git push origin v#{version}"
+  puts "4. gem build #{gem_name}.gemspec"
+  puts "5. mv #{gem_name}-#{version}.gem ~/gems/"
+  puts "6. gem push ~/gems/#{gem_name}-#{version}.gem"
 end

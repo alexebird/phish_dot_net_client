@@ -1,21 +1,37 @@
 # encoding: utf-8
 
-# @api private
 module PhishDotNetClient
+
+  # This class represents the parsed data from the 'setlistdata' field.
   class Setlist
 
+    # @!attribute [r] sets
+    #   @return [Array<Set>] the setlist's sets
     attr_reader :sets
+
+    # @!attribute [r] footnotes
+    #   @return [Hash<Integer, Hash<Symbol, String>>] the setlist's footnotes
     attr_reader :footnotes
 
+    # @param setlistdata [String] the setlistdata string
+    #
+    # @api private
     def initialize(setlistdata)
       @sets, @footnotes = self.class.parse_setlistdata(setlistdata)
     end
 
+    # @return [Array<Song>] all songs in the setlist
     def songs
       return @sets.map(&:songs).reduce([]){|memo,songs| memo += songs }
     end
 
     # @api private
+    #
+    # Does the work of parsing the setlistdata.
+    #
+    # @param setlistdata [String] the setlistdata string
+    #
+    # @return [Array<(Array<Set>, Hash)>] the parsed sets and footnotes
     def self.parse_setlistdata(setlistdata)
       doc = Nokogiri::HTML(setlistdata)
 
@@ -36,14 +52,14 @@ module PhishDotNetClient
       slug_instances = {}
 
       setnodes = doc.css(".pnetset")
-      position_in_show = 1
+      position_in_show = 0
 
       setnodes.each_with_index do |n,set_index|
         setname = n.css(".pnetsetlabel").first.content
-        set = Set.new(:name => setname.sub!(/:\z/, ''), :position => set_index + 1)
+        set = Set.new(:name => setname.sub!(/:\z/, ''), :position => set_index)
         songs_doc = n.css("a")
         songs_doc.each_with_index do |song,song_index|
-          position_in_set = song_index + 1
+          position_in_set = song_index
           title = song.content
           url = song.attr('href')
           slug = URI.parse(url).path
@@ -63,7 +79,7 @@ module PhishDotNetClient
           position_in_show += 1
         end
 
-        transitions_text = n.content
+        transitions_text = n.content  # strips html tags
         transitions_tokens += tokenize_transitions_text(transitions_text, transitions_tokens)
 
         sets << set
@@ -75,6 +91,15 @@ module PhishDotNetClient
     end
 
     # @api private
+    #
+    # Adds footnotes to their associated songs and adds transition information
+    # between songs.
+    #
+    # @param tokens [Array<Hash <Symbol, Object>>] the tokens to augment with
+    # @param songs [Array<Song>] the songs to augment
+    # @param footnotes [Hash<Integer, Hash<Symbol, String>>] the footnotes to augment with
+    #
+    # @return [void]
     def self.augment_songs(tokens, songs, footnotes)
       songs = Array.new(songs)  # make a copy
 
@@ -113,8 +138,18 @@ module PhishDotNetClient
     end
 
     # @api private
+    #
+    # Tokenizes the html-stripped setlistdata text.
+    #
+    # @param transitions_text [String] the text to tokenize
+    # @param existing_tokens [Array<Hash<Symbol, Object>>] tokens of already
+    #   parsed text, so that repeat songs can be detected.
+    #
+    # @raise [RuntimeError] if the transitions_text could not be parsed
+    #
+    # @return [Array<Hash<Symbol, Object>>]
     def self.tokenize_transitions_text(transitions_text, existing_tokens=[])
-      tokens = []
+      rules = []
 
       # Account for multiple songs with the same title in a song list
       song_title_counts = {}
@@ -126,46 +161,47 @@ module PhishDotNetClient
         end
       end
 
-      tokens.push(/\A[a-z0-9\s]+:/i => lambda do |match|
+      rules.push(/\A[a-z0-9\s]+:/i => lambda do |match|
         return { type: :set_name, name: match.to_s.strip.sub(':', '') }
       end)
 
-      tokens.push(/\A[äa-z0-9\-?\.!:\/'\s\(\)]+[a-z0-9\)?!']/i => lambda do |match|
+      rules.push(/\A[äa-z0-9\-?\.!:\/'\s\(\)]+[a-z0-9\)?!']/i => lambda do |match|
         title = match.to_s.strip
         song_title_counts[title] ||= 0
         song_title_counts[title] += 1
         return { type: :song, title: title, instance: song_title_counts[title] }
       end)
 
-      tokens.push(/\A\[(?<num>\d+)\]/ => lambda do |match|
+      rules.push(/\A\[(?<num>\d+)\]/ => lambda do |match|
         return { type: :note_ref, number: match[:num].to_i }
       end)
 
-      tokens.push(/\A,/ => lambda do |match|
+      rules.push(/\A,/ => lambda do |match|
         return { type: :transition, transition_type: :no_segue }
       end)
 
-      tokens.push(/\A>/ => lambda do |match|
+      rules.push(/\A>/ => lambda do |match|
         return { type: :transition, transition_type: :segue }
       end)
 
-      tokens.push(/\A->/ => lambda do |match|
+      rules.push(/\A->/ => lambda do |match|
         return { type: :transition, transition_type: :deep_segue }
       end)
 
-      tokens.push(/\A\s+/ => lambda do |match|
+      rules.push(/\A\s+/ => lambda do |match|
         return nil
       end)
 
       parsed_set = []
 
       until transitions_text.empty?
-        matched = false
+        matched = false  # keeps track of whether the transitions_text matched
+                         # any rule. raise error if there no match.
 
-        tokens.each do |matcher|
-          token_regex, processor = matcher.keys.first, matcher.values.first
+        rules.each do |rule|
+          rule_regex, processor = rule.keys.first, rule.values.first
 
-          if transitions_text.slice!(token_regex)
+          if transitions_text.slice!(rule_regex)
             matched = true
             token = processor.call($~)
             parsed_set.push(token) if token

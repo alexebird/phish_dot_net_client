@@ -1,3 +1,7 @@
+# encoding: utf-8
+
 module PhishDotNetClient
-  VERSION = '0.0.1'
+
+  # Gem version
+  VERSION = '0.1.0'
 end

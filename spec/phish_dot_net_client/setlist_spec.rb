@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe PhishDotNetClient::Setlist do
+  # Test setlistdata:
   # Set 1: Runaway Jim[1], Foam, Punch You In the Eye[2] > Bathtub Gin, Cavern
   # Set 2: Also Sprach Zarathustra -> Cavern
   # Encore: Sleeping Monkey
