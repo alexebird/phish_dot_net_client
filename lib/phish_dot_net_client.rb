@@ -57,8 +57,9 @@ module PhishDotNetClient
   # The base URL for API calls
   BASE_URL = "https://api.phish.net/api.js"
 
-  # "https://api.phish.net/api.js?api=2.0&method=pnet.shows.query&format=json&apikey=920FF765772E442F3E22&year=2011"
+  # "https://api.phish.net/api.js?api=2.0&method=pnet.shows.query&format=json&apikey=XXX&year=2011"
 
+  # Default API parameters
   DEFAULT_PARAMS = { api: "2.0",
                   format: "json" }
 
