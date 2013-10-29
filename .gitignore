@@ -10,3 +10,5 @@ doc/*
 .ruby-version
 *.gem
 Gemfile.lock
+.bundle/
+bin/

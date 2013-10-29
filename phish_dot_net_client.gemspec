@@ -1,6 +1,7 @@
 # encoding: utf-8
 lib = File.expand_path('../lib/', __FILE__)
 $:.unshift lib unless $:.include?(lib)
+require 'date'
 require 'phish_dot_net_client/version'
 
 Gem::Specification.new do |spec|
@@ -14,8 +15,7 @@ Gem::Specification.new do |spec|
   spec.summary     = %q{Phish.net API client with setlist parsing}
   spec.description = %q{Calls any Phish.net API method. Supports authentication. Parses 'setlistdata' fields.}
 
-  spec.required_ruby_version     = '>= 1.9.2'
-  spec.required_rubygems_version = '>= 1.3.6'
+  spec.required_ruby_version     = '>= 1.9.3'
 
   spec.add_runtime_dependency 'rest-client', '~> 1.6.7'
   spec.add_runtime_dependency 'oj', '~> 2.1.7'

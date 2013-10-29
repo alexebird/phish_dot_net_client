@@ -49,6 +49,12 @@ task :"release:instructions" do
   gem_name = File.basename Dir.glob(File.join(File.expand_path('../', __FILE__), '*.gemspec')).first.sub('.gemspec', '')
   last_release = `git tag | grep --color=never -e "v\\d\\+\\." | sort | tail -n1`.strip
 
+  if last_release == "v#{version}"
+    puts
+    puts "WARNING: tag of last release '#{last_release}' matches current version '#{version}'"
+    puts
+  end
+
   puts "1. update version.rb"
   puts "2. update History.md"
   puts "       git log #{last_release}..HEAD --no-merges --format=%B"
