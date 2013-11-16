@@ -1,3 +1,8 @@
+### 0.1.2 / 2013-11-16
+
+* Add MIT license
+
+
 ### 0.1.1 / 2013-10-28
 
 * Make readme better formatted
